@@ -118,12 +118,22 @@ async function getProducts(req, res, next) {
 // GET /api/v1/products/filter-options — distinct sizes & colors (for shop filters)
 async function getFilterOptions(req, res, next) {
   try {
-    const { gender } = req.query;
+    const { category } = req.query;
     const where = { is_active: true };
-    if (gender) where.gender = gender;
+
+    const categoryWhere = {};
+    if (category) categoryWhere.slug = category;
 
     const rows = await Product.findAll({
       where,
+      include: [
+        {
+          model: Category,
+          as: 'category',
+          where: Object.keys(categoryWhere).length ? categoryWhere : undefined,
+          attributes: [],
+        },
+      ],
       attributes: ['sizes', 'colors'],
       raw: true,
     });

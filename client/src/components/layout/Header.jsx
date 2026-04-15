@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Link, NavLink, useNavigate } from 'react-router-dom';
+import { Link, NavLink, useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import { ShoppingBag, Search, Menu, X, User, LogOut, Package, Settings } from 'lucide-react';
 import { useAuthStore } from '../../store/authStore';
 import { useCartStore } from '../../store/cartStore';
@@ -11,10 +11,18 @@ import { LOGO_HEADER_URL } from '../../constants/brand';
 
 const NAV_LINKS = [
   { label: 'All', to: '/shop' },
-  { label: 'Men', to: '/shop/men' },
-  { label: 'Women', to: '/shop/women' },
-  { label: 'Kids', to: '/shop/kids' },
+  { label: 'Men', to: '/shop?category=men' },
+  { label: 'Women', to: '/shop?category=women' },
+  { label: 'Kids', to: '/shop?category=kids' },
 ];
+
+function shopNavLinkActive(to, pathname, currentCategory) {
+  if (pathname !== '/shop') return false;
+  if (to === '/shop') return !currentCategory;
+  const qs = to.includes('?') ? to.split('?')[1] : '';
+  const cat = new URLSearchParams(qs).get('category') || '';
+  return currentCategory === cat;
+}
 
 export default function Header() {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -22,6 +30,9 @@ export default function Header() {
   const [searchQuery, setSearchQuery] = useState('');
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const navigate = useNavigate();
+  const { pathname } = useLocation();
+  const [searchParams] = useSearchParams();
+  const shopCategory = searchParams.get('category') || '';
   const { isAuthenticated, user, logout } = useAuth();
   const guestCount = useCartStore((s) => s.guestItemCount());
   const userMenuRef = useRef(null);
@@ -75,21 +86,21 @@ export default function Header() {
 
           {/* Desktop Nav */}
           <nav className="hidden md:flex items-center gap-1">
-            {NAV_LINKS.map((link) => (
-              <NavLink
-                key={link.to}
-                to={link.to}
-                end={link.to === '/shop'}
-                className={({ isActive }) =>
-                  clsx(
+            {NAV_LINKS.map((link) => {
+              const active = shopNavLinkActive(link.to, pathname, shopCategory);
+              return (
+                <Link
+                  key={link.to}
+                  to={link.to}
+                  className={clsx(
                     'px-4 py-2 text-sm font-medium rounded-lg transition-colors',
-                    isActive ? 'text-ink bg-gray-100' : 'text-ink-muted hover:text-ink hover:bg-gray-50'
-                  )
-                }
-              >
-                {link.label}
-              </NavLink>
-            ))}
+                    active ? 'text-ink bg-gray-100' : 'text-ink-muted hover:text-ink hover:bg-gray-50'
+                  )}
+                >
+                  {link.label}
+                </Link>
+              );
+            })}
           </nav>
 
           {/* Right Controls */}
@@ -192,22 +203,22 @@ export default function Header() {
       {mobileOpen && (
         <div className="md:hidden border-t border-gray-100 bg-white">
           <div className="container-app py-4 space-y-1">
-            {NAV_LINKS.map((link) => (
-              <NavLink
-                key={link.to}
-                to={link.to}
-                end={link.to === '/shop'}
-                onClick={() => setMobileOpen(false)}
-                className={({ isActive }) =>
-                  clsx(
+            {NAV_LINKS.map((link) => {
+              const active = shopNavLinkActive(link.to, pathname, shopCategory);
+              return (
+                <Link
+                  key={link.to}
+                  to={link.to}
+                  onClick={() => setMobileOpen(false)}
+                  className={clsx(
                     'block px-4 py-3 text-sm font-medium rounded-xl transition-colors',
-                    isActive ? 'bg-gray-100 text-ink' : 'text-ink-muted hover:bg-gray-50 hover:text-ink'
-                  )
-                }
-              >
-                {link.label}
-              </NavLink>
-            ))}
+                    active ? 'bg-gray-100 text-ink' : 'text-ink-muted hover:bg-gray-50 hover:text-ink'
+                  )}
+                >
+                  {link.label}
+                </Link>
+              );
+            })}
             {!isAuthenticated && (
               <Link to="/login" className="block px-4 py-3 text-sm font-medium text-brand" onClick={() => setMobileOpen(false)}>
                 Sign in

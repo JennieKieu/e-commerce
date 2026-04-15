@@ -26,9 +26,9 @@ export default function Footer() {
             <h4 className="font-semibold mb-4 text-sm tracking-wider uppercase">Shop</h4>
             <ul className="space-y-2 text-sm text-gray-400">
               <li><Link to="/shop" className="hover:text-white transition-colors">All Products</Link></li>
-              <li><Link to="/shop/men" className="hover:text-white transition-colors">Men</Link></li>
-              <li><Link to="/shop/women" className="hover:text-white transition-colors">Women</Link></li>
-              <li><Link to="/shop/kids" className="hover:text-white transition-colors">Kids</Link></li>
+              <li><Link to="/shop?category=men" className="hover:text-white transition-colors">Men</Link></li>
+              <li><Link to="/shop?category=women" className="hover:text-white transition-colors">Women</Link></li>
+              <li><Link to="/shop?category=kids" className="hover:text-white transition-colors">Kids</Link></li>
             </ul>
           </div>
           <div>

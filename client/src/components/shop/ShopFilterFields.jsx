@@ -13,9 +13,6 @@ function SectionLabel({ id, children }) {
  * Shared filter controls for shop (desktop sidebar + mobile drawer).
  */
 export default function ShopFilterFields({
-  genderOptions = [],
-  gender,
-  onGenderChange,
   categories,
   sizes = [],
   colors = [],
@@ -34,31 +31,6 @@ export default function ShopFilterFields({
 }) {
   return (
     <div className="space-y-8">
-      <div>
-        <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-ink-muted mb-1">Gender</p>
-        <div className="flex flex-wrap gap-2" role="group" aria-label="Gender">
-          {genderOptions.map((g) => {
-            const active = gender === g.value;
-            return (
-              <button
-                key={g.value === '' ? 'all' : g.value}
-                type="button"
-                onClick={() => onGenderChange(g.value)}
-                aria-pressed={active}
-                className={clsx(
-                  'min-h-[40px] px-3 text-sm font-medium rounded-xl border transition-all',
-                  active
-                    ? 'border-ink bg-ink text-white shadow-sm'
-                    : 'border-gray-200 bg-white text-ink hover:border-gray-400'
-                )}
-              >
-                {g.label}
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
       <div>
         <SectionLabel id="filter-category">Product category</SectionLabel>
         <select

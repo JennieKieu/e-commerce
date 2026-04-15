@@ -1,5 +1,5 @@
 import { useState, useEffect, useDeferredValue, useMemo, useCallback } from 'react';
-import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { SlidersHorizontal, X } from 'lucide-react';
 import { productApi, categoryApi } from '../services/api';
@@ -16,24 +16,14 @@ const SORT_OPTIONS = [
   { label: 'Name A-Z', value: 'name-ASC' },
 ];
 
-const GENDERS = [
-  { label: 'All', value: '' },
-  { label: 'Men', value: 'men' },
-  { label: 'Women', value: 'women' },
-  { label: 'Kids', value: 'kids' },
-];
-
 export default function Shop() {
-  const { gender: paramGender } = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
-  const navigate = useNavigate();
+  const categorySlug = searchParams.get('category') || '';
 
   const [page, setPage] = useState(1);
   const [sort, setSort] = useState('created_at-DESC');
-  const [gender, setGender] = useState(paramGender || searchParams.get('gender') || '');
   const [search, setSearch] = useState(searchParams.get('search') || '');
   const [filterOpen, setFilterOpen] = useState(false);
-  const [categorySlug, setCategorySlug] = useState('');
   const [minPrice, setMinPrice] = useState('');
   const [maxPrice, setMaxPrice] = useState('');
   const [featuredOnly, setFeaturedOnly] = useState(false);
@@ -45,22 +35,14 @@ export default function Shop() {
     setSearch(searchParams.get('search') || '');
   }, [searchParams]);
 
-  useEffect(() => {
-    if (paramGender) setGender(paramGender);
-  }, [paramGender]);
-
-  const handleGenderChange = useCallback(
-    (value) => {
-      setGender(value);
-      const query = searchParams.toString();
-      const suffix = query ? `?${query}` : '';
-      if (!value) {
-        navigate(`/shop${suffix}`);
-      } else {
-        navigate(`/shop/${encodeURIComponent(value)}${suffix}`);
-      }
+  const handleCategoryFilterChange = useCallback(
+    (slug) => {
+      const next = new URLSearchParams(searchParams);
+      if (slug) next.set('category', slug);
+      else next.delete('category');
+      setSearchParams(next);
     },
-    [navigate, searchParams]
+    [searchParams, setSearchParams]
   );
 
   const deferredMinPrice = useDeferredValue(minPrice);
@@ -92,10 +74,9 @@ export default function Shop() {
     setPage(1);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [
-    gender,
+    categorySlug,
     sort,
     search,
-    categorySlug,
     deferredMinPrice,
     deferredMaxPrice,
     featuredOnly,
@@ -119,9 +100,9 @@ export default function Shop() {
   });
 
   const { data: filterOptions } = useQuery({
-    queryKey: ['product-filter-options', gender || 'all'],
+    queryKey: ['product-filter-options', categorySlug || 'all'],
     queryFn: () =>
-      productApi.getFilterOptions({ gender: gender || undefined }).then((r) => r.data.data),
+      productApi.getFilterOptions({ category: categorySlug || undefined }).then((r) => r.data.data),
     staleTime: 60_000,
   });
 
@@ -130,7 +111,6 @@ export default function Shop() {
       'products',
       {
         page,
-        gender,
         search,
         sortField,
         sortOrder,
@@ -147,7 +127,6 @@ export default function Shop() {
         .getAll({
           page,
           limit: 12,
-          gender: gender || undefined,
           search: search || undefined,
           sort: sortField,
           order: sortOrder,
@@ -175,7 +154,6 @@ export default function Shop() {
 
   const activeFilterCount = useMemo(() => {
     let n = 0;
-    if (gender) n += 1;
     if (categorySlug) n += 1;
     if (minPrice.trim()) n += 1;
     if (maxPrice.trim()) n += 1;
@@ -183,17 +161,14 @@ export default function Shop() {
     n += selectedSizes.length;
     n += selectedColors.length;
     return n;
-  }, [gender, categorySlug, minPrice, maxPrice, featuredOnly, selectedSizes.length, selectedColors.length]);
+  }, [categorySlug, minPrice, maxPrice, featuredOnly, selectedSizes.length, selectedColors.length]);
 
   const filterFieldProps = {
-    genderOptions: GENDERS,
-    gender,
-    onGenderChange: handleGenderChange,
     categories,
     sizes: filterOptions?.sizes ?? [],
     colors: filterOptions?.colors ?? [],
     categorySlug,
-    onCategoryChange: setCategorySlug,
+    onCategoryChange: handleCategoryFilterChange,
     minPrice,
     maxPrice,
     onMinPriceChange: setMinPrice,
@@ -214,16 +189,14 @@ export default function Shop() {
   };
 
   const clearPanelFilters = () => {
-    setCategorySlug('');
     setMinPrice('');
     setMaxPrice('');
     setFeaturedOnly(false);
     setSelectedSizes([]);
     setSelectedColors([]);
-    setGender('');
-    const query = searchParams.toString();
-    const suffix = query ? `?${query}` : '';
-    navigate(`/shop${suffix}`);
+    const next = new URLSearchParams(searchParams);
+    next.delete('category');
+    setSearchParams(next);
   };
 
   return (
@@ -249,7 +222,7 @@ export default function Shop() {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
             <div>
               <h1 className="section-title">
-                {gender ? gender.charAt(0).toUpperCase() + gender.slice(1) : 'All Products'}
+                {categories.find((c) => c.slug === categorySlug)?.name || 'All Products'}
               </h1>
               {pagination && (
                 <p className="text-sm text-ink-muted mt-1">{pagination.total} products</p>

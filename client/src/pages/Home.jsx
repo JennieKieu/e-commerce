@@ -43,7 +43,7 @@ export default function Home() {
           {(categories || []).map((cat) => (
             <Link
               key={cat.id}
-              to={`/shop/${cat.slug}`}
+              to={`/shop?category=${encodeURIComponent(cat.slug)}`}
               className="group relative aspect-video sm:aspect-[4/5] overflow-hidden rounded-2xl"
             >
               <img

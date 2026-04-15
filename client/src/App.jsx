@@ -1,4 +1,4 @@
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useParams } from 'react-router-dom';
 import { useAuthStore } from './store/authStore';
 import Layout from './components/layout/Layout';
 import AdminLayout from './components/layout/AdminLayout';
@@ -48,6 +48,12 @@ function GuestRoute({ children }) {
   return <Navigate to={home} replace />;
 }
 
+/** /shop/men → /shop?category=men (giữ link cũ) */
+function LegacyShopRedirect() {
+  const { gender } = useParams();
+  return <Navigate to={`/shop?category=${encodeURIComponent(gender)}`} replace />;
+}
+
 export default function App() {
   return (
     <Routes>
@@ -55,7 +61,7 @@ export default function App() {
       <Route element={<Layout />}>
         <Route path="/" element={<Home />} />
         <Route path="/shop" element={<Shop />} />
-        <Route path="/shop/:gender" element={<Shop />} />
+        <Route path="/shop/:gender" element={<LegacyShopRedirect />} />
         <Route path="/products/:slug" element={<ProductDetail />} />
         <Route path="/cart" element={<CartPage />} />
         <Route path="/checkout" element={<PrivateRoute><CheckoutPage /></PrivateRoute>} />
