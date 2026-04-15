@@ -1,0 +1,14 @@
+node_modules/
+.env
+dist/
+build/
+.DS_Store
+*.log
+npm-debug.log*
+.cache/
+
+# Tài liệu nội bộ / luận văn (không push lên remote)
+database-schema.md
+class-diagram.drawio
+docs/CHUONG-3-xay-dung-va-phat-trien.md
+docs/DEPLOY-RENDER.md

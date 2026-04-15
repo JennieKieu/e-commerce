@@ -1,0 +1,24 @@
+# Render Blueprint — https://render.com/docs/blueprint-spec
+#
+# Biến bí mật KHÔNG ghi vào file này; thêm trên Render Dashboard → Environment.
+#
+# Database (MySQL trên Railway, tab Variables):
+#   DB_HOST     ← host trong MYSQL_PUBLIC_URL, hoặc MYSQLHOST nếu đã public
+#   DB_PORT     ← MYSQLPORT
+#   DB_NAME     ← MYSQLDATABASE (hoặc MYSQL_DATABASE)
+#   DB_USER     ← MYSQLUSER
+#   DB_PASSWORD ← MYSQLPASSWORD
+#
+# Bắt buộc khác: JWT_ACCESS_SECRET, JWT_REFRESH_SECRET, CLIENT_URL (URL Web Service Render),
+#   CLOUDINARY_*, MAILJET_*, OTP_*, FREE_SHIPPING_MIN, STANDARD_SHIPPING_FEE (xem server/.env.example)
+#
+services:
+  - type: web
+    name: luxemode-web
+    runtime: node
+    plan: free
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
