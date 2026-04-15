@@ -508,7 +508,7 @@ function ProductModal({ product, categories, onClose, onSave }) {
               </label>
               <input
                 type="url"
-                placeholder="Để trống = dùng ảnh đầu tiên trong gallery (sau khi upload)"
+                placeholder="Leave empty to use the first gallery image (after upload)"
                 value={form.thumbnail_url || ''}
                 onChange={(e) => setForm((f) => ({ ...f, thumbnail_url: e.target.value }))}
                 className="input-base text-sm"
@@ -527,8 +527,9 @@ function ProductModal({ product, categories, onClose, onSave }) {
                 </div>
               )}
               <p className="text-xs text-ink-muted mt-1.5">
-                Mặc định dùng <strong>ảnh gallery đầu tiên</strong> (thứ tự sort). Sản phẩm mới: upload gallery
-                rồi để trống — server gán thumbnail từ ảnh đầu. Có thể dán URL riêng để ghi đè.
+                Defaults to the <strong>first gallery image</strong> (by sort order). For new products, upload gallery
+                files and leave this empty—the server sets the thumbnail from the first upload. Paste a URL here to
+                override.
               </p>
             </div>
 
