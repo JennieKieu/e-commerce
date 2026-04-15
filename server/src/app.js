@@ -17,8 +17,18 @@ const { purgeExpiredTokens } = require('./services/auth.service');
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Security
-app.use(helmet());
+// Security — mặc định Helmet chặn ảnh cross-origin (img-src chỉ 'self').
+// Ảnh sản phẩm dùng Cloudinary, Unsplash, v.v. → cho phép https: cho img-src.
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      useDefaults: true,
+      directives: {
+        'img-src': ["'self'", 'data:', 'blob:', 'https:'],
+      },
+    },
+  })
+);
 app.use(cors({
   origin: process.env.CLIENT_URL || 'http://localhost:5173',
   credentials: true,
