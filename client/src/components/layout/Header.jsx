@@ -11,17 +11,17 @@ import { LOGO_HEADER_URL } from '../../constants/brand';
 
 const NAV_LINKS = [
   { label: 'All', to: '/shop' },
-  { label: 'Men', to: '/shop?category=men' },
-  { label: 'Women', to: '/shop?category=women' },
-  { label: 'Kids', to: '/shop?category=kids' },
+  { label: 'Men', to: '/shop?gender=men' },
+  { label: 'Women', to: '/shop?gender=women' },
+  { label: 'Kids', to: '/shop?gender=kids' },
 ];
 
-function shopNavLinkActive(to, pathname, currentCategory) {
+function shopNavLinkActive(to, pathname, currentGender) {
   if (pathname !== '/shop') return false;
-  if (to === '/shop') return !currentCategory;
+  if (to === '/shop') return !currentGender;
   const qs = to.includes('?') ? to.split('?')[1] : '';
-  const cat = new URLSearchParams(qs).get('category') || '';
-  return currentCategory === cat;
+  const g = new URLSearchParams(qs).get('gender') || '';
+  return currentGender === g;
 }
 
 export default function Header() {
@@ -32,7 +32,7 @@ export default function Header() {
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const [searchParams] = useSearchParams();
-  const shopCategory = searchParams.get('category') || '';
+  const shopGender = searchParams.get('gender') || '';
   const { isAuthenticated, user, logout } = useAuth();
   const guestCount = useCartStore((s) => s.guestItemCount());
   const userMenuRef = useRef(null);
@@ -50,7 +50,9 @@ export default function Header() {
   const handleSearch = (e) => {
     e.preventDefault();
     if (searchQuery.trim()) {
-      navigate(`/shop?search=${encodeURIComponent(searchQuery.trim())}`);
+      const next = new URLSearchParams(searchParams);
+      next.set('search', searchQuery.trim());
+      navigate({ pathname: '/shop', search: `?${next.toString()}` });
       setSearchQuery('');
       setSearchOpen(false);
     }
@@ -87,7 +89,7 @@ export default function Header() {
           {/* Desktop Nav */}
           <nav className="hidden md:flex items-center gap-1">
             {NAV_LINKS.map((link) => {
-              const active = shopNavLinkActive(link.to, pathname, shopCategory);
+              const active = shopNavLinkActive(link.to, pathname, shopGender);
               return (
                 <Link
                   key={link.to}
@@ -204,7 +206,7 @@ export default function Header() {
         <div className="md:hidden border-t border-gray-100 bg-white">
           <div className="container-app py-4 space-y-1">
             {NAV_LINKS.map((link) => {
-              const active = shopNavLinkActive(link.to, pathname, shopCategory);
+              const active = shopNavLinkActive(link.to, pathname, shopGender);
               return (
                 <Link
                   key={link.to}

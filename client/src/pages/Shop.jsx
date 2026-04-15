@@ -19,6 +19,7 @@ const SORT_OPTIONS = [
 export default function Shop() {
   const [searchParams, setSearchParams] = useSearchParams();
   const categorySlug = searchParams.get('category') || '';
+  const genderParam = searchParams.get('gender') || '';
 
   const [page, setPage] = useState(1);
   const [sort, setSort] = useState('created_at-DESC');
@@ -75,6 +76,7 @@ export default function Shop() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [
     categorySlug,
+    genderParam,
     sort,
     search,
     deferredMinPrice,
@@ -100,9 +102,14 @@ export default function Shop() {
   });
 
   const { data: filterOptions } = useQuery({
-    queryKey: ['product-filter-options', categorySlug || 'all'],
+    queryKey: ['product-filter-options', categorySlug || 'all', genderParam || 'all'],
     queryFn: () =>
-      productApi.getFilterOptions({ category: categorySlug || undefined }).then((r) => r.data.data),
+      productApi
+        .getFilterOptions({
+          category: categorySlug || undefined,
+          gender: genderParam || undefined,
+        })
+        .then((r) => r.data.data),
     staleTime: 60_000,
   });
 
@@ -115,6 +122,7 @@ export default function Shop() {
         sortField,
         sortOrder,
         categorySlug,
+        genderParam,
         minPriceNum,
         maxPriceNum,
         featuredOnly,
@@ -131,6 +139,7 @@ export default function Shop() {
           sort: sortField,
           order: sortOrder,
           category: categorySlug || undefined,
+          gender: genderParam || undefined,
           minPrice: minPriceNum,
           maxPrice: maxPriceNum,
           featured: featuredOnly ? 'true' : undefined,
@@ -154,6 +163,7 @@ export default function Shop() {
 
   const activeFilterCount = useMemo(() => {
     let n = 0;
+    if (genderParam) n += 1;
     if (categorySlug) n += 1;
     if (minPrice.trim()) n += 1;
     if (maxPrice.trim()) n += 1;
@@ -161,7 +171,7 @@ export default function Shop() {
     n += selectedSizes.length;
     n += selectedColors.length;
     return n;
-  }, [categorySlug, minPrice, maxPrice, featuredOnly, selectedSizes.length, selectedColors.length]);
+  }, [genderParam, categorySlug, minPrice, maxPrice, featuredOnly, selectedSizes.length, selectedColors.length]);
 
   const filterFieldProps = {
     categories,
@@ -196,6 +206,7 @@ export default function Shop() {
     setSelectedColors([]);
     const next = new URLSearchParams(searchParams);
     next.delete('category');
+    next.delete('gender');
     setSearchParams(next);
   };
 
@@ -222,7 +233,11 @@ export default function Shop() {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
             <div>
               <h1 className="section-title">
-                {categories.find((c) => c.slug === categorySlug)?.name || 'All Products'}
+                {categories.find((c) => c.slug === categorySlug)?.name ||
+                  (genderParam
+                    ? genderParam.charAt(0).toUpperCase() + genderParam.slice(1)
+                    : null) ||
+                  'All Products'}
               </h1>
               {pagination && (
                 <p className="text-sm text-ink-muted mt-1">{pagination.total} products</p>

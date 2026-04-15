@@ -48,10 +48,10 @@ function GuestRoute({ children }) {
   return <Navigate to={home} replace />;
 }
 
-/** /shop/men → /shop?category=men (giữ link cũ) */
+/** /shop/men → /shop?gender=men (giữ link cũ) */
 function LegacyShopRedirect() {
   const { gender } = useParams();
-  return <Navigate to={`/shop?category=${encodeURIComponent(gender)}`} replace />;
+  return <Navigate to={`/shop?gender=${encodeURIComponent(gender)}`} replace />;
 }
 
 export default function App() {

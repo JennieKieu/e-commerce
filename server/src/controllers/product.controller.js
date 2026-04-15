@@ -118,8 +118,9 @@ async function getProducts(req, res, next) {
 // GET /api/v1/products/filter-options — distinct sizes & colors (for shop filters)
 async function getFilterOptions(req, res, next) {
   try {
-    const { category } = req.query;
+    const { category, gender } = req.query;
     const where = { is_active: true };
+    if (gender) where.gender = gender;
 
     const categoryWhere = {};
     if (category) categoryWhere.slug = category;
