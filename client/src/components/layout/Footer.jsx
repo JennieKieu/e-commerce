@@ -29,6 +29,7 @@ export default function Footer() {
               <li><Link to="/shop?gender=men" className="hover:text-white transition-colors">Men</Link></li>
               <li><Link to="/shop?gender=women" className="hover:text-white transition-colors">Women</Link></li>
               <li><Link to="/shop?gender=kids" className="hover:text-white transition-colors">Kids</Link></li>
+              <li><Link to="/shop?gender=unisex" className="hover:text-white transition-colors">Unisex</Link></li>
             </ul>
           </div>
           <div>

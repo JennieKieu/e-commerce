@@ -14,6 +14,7 @@ const NAV_LINKS = [
   { label: 'Men', to: '/shop?gender=men' },
   { label: 'Women', to: '/shop?gender=women' },
   { label: 'Kids', to: '/shop?gender=kids' },
+  { label: 'Unisex', to: '/shop?gender=unisex' },
 ];
 
 function shopNavLinkActive(to, pathname, currentGender) {
