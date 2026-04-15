@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { adminApi, categoryApi, productApi } from '../../services/api';
 import { PageSpinner } from '../../components/ui/Spinner';
@@ -42,7 +42,13 @@ function ProductModal({ product, categories, onClose, onSave }) {
     enabled: isEdit && !!product?.id,
   });
 
-  const existingImages = productDetail?.images || [];
+  const existingImages = useMemo(
+    () =>
+      [...(productDetail?.images || [])].sort(
+        (a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0)
+      ),
+    [productDetail?.images]
+  );
 
   useEffect(() => {
     if (productDetail?.variants?.length) {
@@ -153,12 +159,19 @@ function ProductModal({ product, categories, onClose, onSave }) {
     try {
       const rawFiles = galleryFiles.map((x) => x.file);
 
+      let thumbUrl = form.thumbnail_url?.trim() || '';
+      let thumbPid = form.thumbnail_public_id?.trim() || '';
+      if (!thumbUrl && existingImages.length > 0) {
+        thumbUrl = existingImages[0].url;
+        thumbPid = existingImages[0].public_id;
+      }
+
       const data = {
         ...form,
         price: parseFloat(form.price),
         sale_price: form.sale_price ? parseFloat(form.sale_price) : null,
-        thumbnail_url: form.thumbnail_url?.trim() || null,
-        thumbnail_public_id: form.thumbnail_public_id?.trim() || null,
+        thumbnail_url: thumbUrl || null,
+        thumbnail_public_id: thumbPid || null,
       };
 
       let rowsToSave = variantRows;
@@ -495,7 +508,7 @@ function ProductModal({ product, categories, onClose, onSave }) {
               </label>
               <input
                 type="url"
-                placeholder="https://… — leave empty if using file uploads below"
+                placeholder="Để trống = dùng ảnh đầu tiên trong gallery (sau khi upload)"
                 value={form.thumbnail_url || ''}
                 onChange={(e) => setForm((f) => ({ ...f, thumbnail_url: e.target.value }))}
                 className="input-base text-sm"
@@ -505,14 +518,17 @@ function ProductModal({ product, categories, onClose, onSave }) {
                   <img
                     src={form.thumbnail_url}
                     alt="Thumbnail preview"
-                    onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                    onError={(e) => {
+                      e.currentTarget.style.display = 'none';
+                    }}
                     className="w-16 h-20 object-cover rounded-lg border border-gray-200"
                   />
                   <p className="text-xs text-ink-muted mt-1">Thumbnail preview (if URL is valid)</p>
                 </div>
               )}
               <p className="text-xs text-ink-muted mt-1.5">
-                If set, this URL is used as the thumbnail. Uploaded gallery images are still added alongside it.
+                Mặc định dùng <strong>ảnh gallery đầu tiên</strong> (thứ tự sort). Sản phẩm mới: upload gallery
+                rồi để trống — server gán thumbnail từ ảnh đầu. Có thể dán URL riêng để ghi đè.
               </p>
             </div>
 
